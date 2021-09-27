@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "br.com.zupacademy.gabrielamartins";
+option java_outer_classname = "KeyManager";
+option objc_class_prefix = "HLW";
+
+package br.com.zupacademy.gabrielamartins;
+
+service KeyManagerService {
+  rpc cadastrarChavePix (CadastrarChavePixRequest) returns (CadastrarChavePixResponse) {}
+}
+
+
+enum TipoChave {
+
+  CHAVE_DESCONHECIDA = 0;
+  CPF = 1;
+  TELEFONE = 2;
+  EMAIL = 3;
+  ALEATORIA = 4;
+
+}
+
+enum TipoConta {
+
+  DESCONHECIDO = 0;
+  CONTA_CORRENTE = 1;
+  CONTA_POUPANCA = 2;
+
+}
+
+message CadastrarChavePixRequest {
+
+  string clienteId = 1;
+  TipoChave tipoChave = 2;
+  string chave = 3;
+  TipoConta tipoConta = 4;
+
+
+
+}
+
+message CadastrarChavePixResponse {
+
+  int64 pixId = 1;
+}
