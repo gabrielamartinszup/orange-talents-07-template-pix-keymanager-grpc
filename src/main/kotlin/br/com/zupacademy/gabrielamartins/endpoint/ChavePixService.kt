@@ -22,7 +22,7 @@ class ChavePixService(@Inject val repository: ChavePixRepository, @Inject val it
         // verifica se chave já existe no sistema
 
         if (repository.existsByChave(chavePixRequestDto.chave))
-            throw ChaveExistenteException("Chave Pix ${chavePixRequestDto.chave} já existe no sistema")
+            throw ChaveExistenteException("Chave Pix '${chavePixRequestDto.chave}' já existe no sistema")
 
         //busca dados da conta no ERP do Itau
 
