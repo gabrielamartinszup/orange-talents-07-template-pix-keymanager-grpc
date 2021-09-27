@@ -1,6 +1,7 @@
 package br.com.zupacademy.gabrielamartins.exception.handler
 
 import br.com.zupacademy.gabrielamartins.exception.custom.ChaveExistenteException
+import br.com.zupacademy.gabrielamartins.exception.custom.ChavePixNaoEncontradaException
 import io.grpc.Status
 import io.grpc.stub.StreamObserver
 import io.micronaut.aop.InterceptorBean
@@ -41,6 +42,7 @@ class ErrorHandlerInterceptor() : MethodInterceptor<Any, Any> {
             is ConstraintViolationException -> status(Status.INVALID_ARGUMENT, ex)
             is PersistenceException -> status(Status.INVALID_ARGUMENT, ex)
             is ChaveExistenteException -> status(Status.ALREADY_EXISTS, ex)
+            is ChavePixNaoEncontradaException -> status(Status.NOT_FOUND, ex)
 
             else -> Status.UNKNOWN.withCause(ex).withDescription("Erro inesperado ocorreu")
         }

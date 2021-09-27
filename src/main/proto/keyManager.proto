@@ -9,7 +9,10 @@ package br.com.zupacademy.gabrielamartins;
 
 service KeyManagerService {
   rpc cadastrarChavePix (CadastrarChavePixRequest) returns (CadastrarChavePixResponse) {}
+
+  rpc removerChavePix (RemoverChavePixRequest) returns (RemoverChavePixResponse){}
 }
+
 
 
 enum TipoChave {
@@ -43,5 +46,18 @@ message CadastrarChavePixRequest {
 
 message CadastrarChavePixResponse {
 
-  int64 pixId = 1;
+  string pixId = 1;
+  string clienteId = 2;
+}
+
+message RemoverChavePixRequest {
+
+  string clienteId = 1;
+  string pixId = 2;
+}
+
+message RemoverChavePixResponse {
+
+  string clienteId = 1;
+  string pixId = 2;
 }

@@ -39,6 +39,10 @@ internal class ChavePixEndpointTest(
     @Inject
     lateinit var itauClient: ItauErpClient
 
+    companion object {
+        val CLIENTE_ID = UUID.randomUUID()
+    }
+
     @BeforeEach
     fun setup() {
         repository.deleteAll()
@@ -55,14 +59,14 @@ internal class ChavePixEndpointTest(
 
         //cenário
 
-        `when`(itauClient.consulta(clienteId = "c56dfef4-7901-44fb-84e2-a2cefb157890", tipo = "CONTA_CORRENTE"))
+        `when`(itauClient.consulta(clienteId = CLIENTE_ID.toString(), tipo = "CONTA_CORRENTE"))
             .thenReturn(HttpResponse.ok(dadosDaContaResponse()))
 
         //ação
 
         val response = grpcClient.cadastrarChavePix(
             CadastrarChavePixRequest.newBuilder()
-                .setClienteId("c56dfef4-7901-44fb-84e2-a2cefb157890")
+                .setClienteId(CLIENTE_ID.toString())
                 .setTipoChave(TipoChave.EMAIL)
                 .setChave("rponte@gamil.com")
                 .setTipoConta(TipoConta.CONTA_CORRENTE)
@@ -86,7 +90,7 @@ internal class ChavePixEndpointTest(
             chave(
                 tipoChave = br.com.zupacademy.gabrielamartins.model.enum.TipoChave.CPF,
                 chave = "63657520325",
-                clienteId = "c56dfef4-7901-44fb-84e2-a2cefb157890"
+                clienteId = CLIENTE_ID
             )
         )
 
@@ -94,7 +98,7 @@ internal class ChavePixEndpointTest(
 
         val thrown = assertThrows<StatusRuntimeException>{
             grpcClient.cadastrarChavePix(CadastrarChavePixRequest.newBuilder()
-                .setClienteId("c56dfef4-7901-44fb-84e2-a2cefb157890")
+                .setClienteId(CLIENTE_ID.toString())
                 .setTipoChave(TipoChave.CPF)
                 .setChave("63657520325")
                 .setTipoConta(TipoConta.CONTA_CORRENTE)
@@ -113,14 +117,14 @@ internal class ChavePixEndpointTest(
     fun naoDeveCadastrarQuandoClienteNaoExistir(){
 
         //cenario
-        `when`(itauClient.consulta(clienteId = "c56dfef4-7901-44fb-84e2-a2cefb157890", tipo = "CONTA_CORRENTE"))
+        `when`(itauClient.consulta(clienteId = CLIENTE_ID.toString(), tipo = "CONTA_CORRENTE"))
             .thenReturn(HttpResponse.notFound())
 
         //ação
 
         val thrown = assertThrows<StatusRuntimeException> {
             grpcClient.cadastrarChavePix(CadastrarChavePixRequest.newBuilder()
-                .setClienteId("c56dfef4-7901-44fb-84e2-a2cefb157890")
+                .setClienteId(CLIENTE_ID.toString())
                 .setTipoChave(TipoChave.EMAIL)
                 .setChave("rponte@gmail.com")
                 .setTipoConta(TipoConta.CONTA_CORRENTE)
@@ -168,7 +172,7 @@ internal class ChavePixEndpointTest(
     private fun chave(
         tipoChave: br.com.zupacademy.gabrielamartins.model.enum.TipoChave,
         chave: String = UUID.randomUUID().toString(),
-        clienteId: String
+        clienteId: UUID = UUID.randomUUID()
     ): ChavePix {
         return ChavePix(
             clienteId = clienteId,

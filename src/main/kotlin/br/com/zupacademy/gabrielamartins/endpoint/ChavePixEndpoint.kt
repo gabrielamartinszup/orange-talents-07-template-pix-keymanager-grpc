@@ -1,15 +1,14 @@
 package br.com.zupacademy.gabrielamartins.endpoint
 
 
-import br.com.zupacademy.gabrielamartins.CadastrarChavePixRequest
-import br.com.zupacademy.gabrielamartins.CadastrarChavePixResponse
-import br.com.zupacademy.gabrielamartins.KeyManagerServiceGrpc
+import br.com.zupacademy.gabrielamartins.*
 
 import br.com.zupacademy.gabrielamartins.exception.handler.ErrorHandler
 import io.grpc.stub.StreamObserver
 
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import javax.transaction.Transactional
 
 
 @Singleton
@@ -34,9 +33,25 @@ class ChavePixEndpoint(
 
         responseObserver.onNext(
             CadastrarChavePixResponse.newBuilder()
-                .setPixId(chaveCriada.id!!)
+                .setPixId(chaveCriada.id.toString())
+                .setClienteId(chaveCriada.clienteId.toString())
                 .build()
         )
+
+        responseObserver.onCompleted()
+    }
+
+
+    override fun removerChavePix(
+        request: RemoverChavePixRequest,
+        responseObserver: StreamObserver<RemoverChavePixResponse>
+    ) {
+        chavePixService.remove(clienteId = request.clienteId, pixId = request.pixId)
+
+        responseObserver.onNext(RemoverChavePixResponse.newBuilder()
+            .setClienteId(request.clienteId)
+            .setPixId(request.pixId)
+            .build())
 
         responseObserver.onCompleted()
     }
