@@ -1,7 +1,8 @@
-package br.com.zupacademy.gabrielamartins.endpoint
+package br.com.zupacademy.gabrielamartins.endpoint.cadastra
 
 import br.com.zupacademy.gabrielamartins.CadastrarChavePixRequest
-import br.com.zupacademy.gabrielamartins.KeyManagerServiceGrpc
+import br.com.zupacademy.gabrielamartins.KeyManagerCadastraServiceGrpc
+
 import br.com.zupacademy.gabrielamartins.TipoChave
 import br.com.zupacademy.gabrielamartins.TipoConta
 import br.com.zupacademy.gabrielamartins.dto.response.DadosContaResponse
@@ -31,9 +32,9 @@ import org.mockito.Mockito.`when`
 import java.util.*
 
 @MicronautTest(transactional = false)
-internal class ChavePixEndpointTest(
+internal class CadastraChavePixEndpointTest(
     val repository: ChavePixRepository,
-    val grpcClient: KeyManagerServiceGrpc.KeyManagerServiceBlockingStub
+    val grpcClient: KeyManagerCadastraServiceGrpc.KeyManagerCadastraServiceBlockingStub
 ) {
 
     @Inject
@@ -192,8 +193,8 @@ internal class ChavePixEndpointTest(
     @Factory
     class Clients {
         @Bean
-        fun blockingStub(@GrpcChannel(GrpcServerChannel.NAME) channel: ManagedChannel): KeyManagerServiceGrpc.KeyManagerServiceBlockingStub {
-            return KeyManagerServiceGrpc.newBlockingStub(channel)
+        fun blockingStub(@GrpcChannel(GrpcServerChannel.NAME) channel: ManagedChannel): KeyManagerCadastraServiceGrpc.KeyManagerCadastraServiceBlockingStub {
+            return KeyManagerCadastraServiceGrpc.newBlockingStub(channel)
         }
 
 

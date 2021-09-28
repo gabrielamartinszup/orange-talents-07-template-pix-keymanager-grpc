@@ -1,4 +1,4 @@
-package br.com.zupacademy.gabrielamartins.endpoint
+package br.com.zupacademy.gabrielamartins.endpoint.create
 
 import br.com.zupacademy.gabrielamartins.dto.request.ChavePixRequestDto
 import br.com.zupacademy.gabrielamartins.exception.custom.ChaveExistenteException
@@ -18,7 +18,7 @@ import javax.validation.constraints.NotBlank
 
 @Singleton
 @Validated
-class ChavePixService(@Inject val repository: ChavePixRepository, @Inject val itauErpClient: ItauErpClient) {
+class CadastraChavePixService(@Inject val repository: ChavePixRepository, @Inject val itauErpClient: ItauErpClient) {
 
     @Transactional
     fun cadastra(@Valid chavePixRequestDto: ChavePixRequestDto): ChavePix {
@@ -43,20 +43,5 @@ class ChavePixService(@Inject val repository: ChavePixRepository, @Inject val it
     }
 
 
-    @Transactional
-    fun remove(
-        @NotBlank @ValidUUID("ClienteID com formato inválido") clienteId: String,
-        @NotBlank @ValidUUID("PixID com formato inválido") pixId: String
-    ) {
-
-        val uuidPixId = UUID.fromString(pixId)
-        val uuidClienteId = UUID.fromString(clienteId)
-
-
-        val chave = repository.findByIdAndClienteId(uuidPixId, uuidClienteId)
-            .orElseThrow { ChavePixNaoEncontradaException("Chave Pix não foi encontrada ou não pertence ao cliente") }
-
-        repository.deleteById(uuidPixId)
-    }
-
+//
 }

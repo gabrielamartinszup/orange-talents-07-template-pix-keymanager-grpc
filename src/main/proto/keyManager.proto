@@ -7,9 +7,13 @@ option objc_class_prefix = "HLW";
 
 package br.com.zupacademy.gabrielamartins;
 
-service KeyManagerService {
+service KeyManagerCadastraService{
   rpc cadastrarChavePix (CadastrarChavePixRequest) returns (CadastrarChavePixResponse) {}
 
+
+}
+
+service KeyManagerRemoveService{
   rpc removerChavePix (RemoverChavePixRequest) returns (RemoverChavePixResponse){}
 }
 
