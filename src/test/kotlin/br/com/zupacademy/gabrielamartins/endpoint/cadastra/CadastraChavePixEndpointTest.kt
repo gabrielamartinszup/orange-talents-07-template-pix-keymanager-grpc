@@ -89,7 +89,7 @@ internal class CadastraChavePixEndpointTest(
 
         repository.save(
             chave(
-                tipoChave = br.com.zupacademy.gabrielamartins.model.enum.TipoChave.CPF,
+                tipoChave = br.com.zupacademy.gabrielamartins.model.enums.TipoChave.CPF,
                 chave = "63657520325",
                 clienteId = CLIENTE_ID
             )
@@ -171,7 +171,7 @@ internal class CadastraChavePixEndpointTest(
     }
 
     private fun chave(
-        tipoChave: br.com.zupacademy.gabrielamartins.model.enum.TipoChave,
+        tipoChave: br.com.zupacademy.gabrielamartins.model.enums.TipoChave,
         chave: String = UUID.randomUUID().toString(),
         clienteId: UUID = UUID.randomUUID()
     ): ChavePix {
@@ -179,7 +179,7 @@ internal class CadastraChavePixEndpointTest(
             clienteId = clienteId,
             tipoChave = tipoChave,
             chave = chave,
-            tipoConta = br.com.zupacademy.gabrielamartins.model.enum.TipoConta.CONTA_CORRENTE,
+            tipoConta = br.com.zupacademy.gabrielamartins.model.enums.TipoConta.CONTA_CORRENTE,
             conta = Conta(
                 instituicao = "UNIBANCO_ITAU",
                 nomeTitular = "Rafael Ponte",

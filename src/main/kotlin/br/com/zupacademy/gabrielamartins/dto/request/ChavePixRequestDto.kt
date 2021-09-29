@@ -3,9 +3,9 @@ package br.com.zupacademy.gabrielamartins.dto.request
 
 import br.com.zupacademy.gabrielamartins.model.ChavePix
 import br.com.zupacademy.gabrielamartins.model.Conta
-import br.com.zupacademy.gabrielamartins.model.enum.TipoChave
+import br.com.zupacademy.gabrielamartins.model.enums.TipoChave
 
-import br.com.zupacademy.gabrielamartins.model.enum.TipoConta
+import br.com.zupacademy.gabrielamartins.model.enums.TipoConta
 import br.com.zupacademy.gabrielamartins.validation.ChavePixValida
 import br.com.zupacademy.gabrielamartins.validation.ValidUUID
 import io.micronaut.core.annotation.Introspected

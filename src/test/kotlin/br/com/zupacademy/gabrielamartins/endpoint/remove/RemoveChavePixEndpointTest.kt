@@ -1,11 +1,10 @@
 package br.com.zupacademy.gabrielamartins.endpoint.remove
 
-import br.com.zupacademy.gabrielamartins.KeyManagerCadastraServiceGrpc
 import br.com.zupacademy.gabrielamartins.KeyManagerRemoveServiceGrpc
 import br.com.zupacademy.gabrielamartins.RemoverChavePixRequest
 import br.com.zupacademy.gabrielamartins.model.ChavePix
 import br.com.zupacademy.gabrielamartins.model.Conta
-import br.com.zupacademy.gabrielamartins.model.enum.TipoChave
+import br.com.zupacademy.gabrielamartins.model.enums.TipoChave
 import br.com.zupacademy.gabrielamartins.repository.ChavePixRepository
 import io.grpc.ManagedChannel
 import io.grpc.Status
@@ -138,7 +137,7 @@ internal class RemoveChavePixEndpointTest(
     }
 
     private fun chave(
-        tipoChave: br.com.zupacademy.gabrielamartins.model.enum.TipoChave,
+        tipoChave: br.com.zupacademy.gabrielamartins.model.enums.TipoChave,
         chave: String = UUID.randomUUID().toString(),
         clienteId: UUID = UUID.randomUUID()
     ): ChavePix {
@@ -146,7 +145,7 @@ internal class RemoveChavePixEndpointTest(
             clienteId = clienteId,
             tipoChave = tipoChave,
             chave = chave,
-            tipoConta = br.com.zupacademy.gabrielamartins.model.enum.TipoConta.CONTA_CORRENTE,
+            tipoConta = br.com.zupacademy.gabrielamartins.model.enums.TipoConta.CONTA_CORRENTE,
             conta = Conta(
                 instituicao = "UNIBANCO_ITAU",
                 nomeTitular = "Rafael Ponte",

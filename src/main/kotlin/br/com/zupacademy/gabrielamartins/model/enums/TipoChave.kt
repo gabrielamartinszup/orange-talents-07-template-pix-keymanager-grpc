@@ -1,4 +1,4 @@
-package br.com.zupacademy.gabrielamartins.model.enum
+package br.com.zupacademy.gabrielamartins.model.enums
 
 import org.hibernate.validator.internal.constraintvalidators.hv.br.CPFValidator
 

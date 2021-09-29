@@ -1,4 +1,4 @@
-package br.com.zupacademy.gabrielamartins.model.enum
+package br.com.zupacademy.gabrielamartins.model.enums
 
 enum class TipoConta {
 

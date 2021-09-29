@@ -5,8 +5,8 @@ import br.com.zupacademy.gabrielamartins.CadastrarChavePixRequest
 import br.com.zupacademy.gabrielamartins.TipoChave.CHAVE_DESCONHECIDA
 import br.com.zupacademy.gabrielamartins.TipoConta.DESCONHECIDO
 import br.com.zupacademy.gabrielamartins.dto.request.ChavePixRequestDto
-import br.com.zupacademy.gabrielamartins.model.enum.TipoChave
-import br.com.zupacademy.gabrielamartins.model.enum.TipoConta
+import br.com.zupacademy.gabrielamartins.model.enums.TipoChave
+import br.com.zupacademy.gabrielamartins.model.enums.TipoConta
 
 
 fun CadastrarChavePixRequest.converteParaChavePixRequestDto(): ChavePixRequestDto {

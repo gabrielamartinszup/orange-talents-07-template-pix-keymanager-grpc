@@ -13,4 +13,8 @@ class Conta(
     @field:NotBlank @field:Size(max = 6) val numeroConta: String
 ) {
 
+    companion object{
+        public val ITAU_UNIBANCO_ISPB: String = "60701190"
+    }
+
 }

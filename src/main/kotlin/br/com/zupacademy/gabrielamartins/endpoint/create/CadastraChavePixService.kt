@@ -2,23 +2,22 @@ package br.com.zupacademy.gabrielamartins.endpoint.create
 
 import br.com.zupacademy.gabrielamartins.dto.request.ChavePixRequestDto
 import br.com.zupacademy.gabrielamartins.exception.custom.ChaveExistenteException
-import br.com.zupacademy.gabrielamartins.exception.custom.ChavePixNaoEncontradaException
 import br.com.zupacademy.gabrielamartins.model.ChavePix
 import br.com.zupacademy.gabrielamartins.repository.ChavePixRepository
+import br.com.zupacademy.gabrielamartins.service.BcbClient
+import br.com.zupacademy.gabrielamartins.service.CreatePixRequest
 import br.com.zupacademy.gabrielamartins.service.ItauErpClient
-import br.com.zupacademy.gabrielamartins.validation.ValidUUID
+import io.micronaut.http.HttpStatus
 import io.micronaut.validation.Validated
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
-import java.util.*
 import javax.transaction.Transactional
 import javax.validation.Valid
-import javax.validation.constraints.NotBlank
 
 
 @Singleton
 @Validated
-class CadastraChavePixService(@Inject val repository: ChavePixRepository, @Inject val itauErpClient: ItauErpClient) {
+class CadastraChavePixService(@Inject val repository: ChavePixRepository, @Inject val itauErpClient: ItauErpClient, @Inject val bancoCentralClient: BcbClient) {
 
     @Transactional
     fun cadastra(@Valid chavePixRequestDto: ChavePixRequestDto): ChavePix {
@@ -38,6 +37,19 @@ class CadastraChavePixService(@Inject val repository: ChavePixRepository, @Injec
 
         val chave = chavePixRequestDto.converteParaChavePix(conta)
         repository.save(chave)
+
+        // registra chave no BCB
+
+        val bcbRequest = CreatePixRequest.of(chave)
+
+        val bcbResponse = bancoCentralClient.cadastra(bcbRequest)
+        if(bcbResponse.status != HttpStatus.CREATED){
+            throw IllegalStateException("Erro ao registrar chave Pix no BCB")
+        }
+
+        //atualiza chave do domínio com a chave gerada pelo BCB
+
+        chave.atualiza(bcbResponse.body()!!.key)
 
         return chave
     }
