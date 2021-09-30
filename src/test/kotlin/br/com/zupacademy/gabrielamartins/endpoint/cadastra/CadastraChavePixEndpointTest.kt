@@ -2,7 +2,6 @@ package br.com.zupacademy.gabrielamartins.endpoint.cadastra
 
 import br.com.zupacademy.gabrielamartins.CadastrarChavePixRequest
 import br.com.zupacademy.gabrielamartins.KeyManagerCadastraServiceGrpc
-
 import br.com.zupacademy.gabrielamartins.TipoChave
 import br.com.zupacademy.gabrielamartins.TipoConta
 import br.com.zupacademy.gabrielamartins.dto.response.DadosContaResponse
@@ -11,7 +10,7 @@ import br.com.zupacademy.gabrielamartins.dto.response.TitularResponse
 import br.com.zupacademy.gabrielamartins.model.ChavePix
 import br.com.zupacademy.gabrielamartins.model.Conta
 import br.com.zupacademy.gabrielamartins.repository.ChavePixRepository
-import br.com.zupacademy.gabrielamartins.service.ItauErpClient
+import br.com.zupacademy.gabrielamartins.service.*
 import io.grpc.ManagedChannel
 import io.grpc.Status
 import io.grpc.StatusRuntimeException
@@ -23,12 +22,14 @@ import io.micronaut.http.HttpResponse
 import io.micronaut.test.annotation.MockBean
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
 import jakarta.inject.Inject
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito
 import org.mockito.Mockito.`when`
+import java.time.LocalDateTime
 import java.util.*
 
 @MicronautTest(transactional = false)
@@ -36,6 +37,9 @@ internal class CadastraChavePixEndpointTest(
     val repository: ChavePixRepository,
     val grpcClient: KeyManagerCadastraServiceGrpc.KeyManagerCadastraServiceBlockingStub
 ) {
+
+    @Inject
+    lateinit var bcbClient: BcbClient
 
     @Inject
     lateinit var itauClient: ItauErpClient
@@ -54,96 +58,117 @@ internal class CadastraChavePixEndpointTest(
     //3. nao registrar quando cliente não existe
     //4. nao registrar quando parâmetros forem inválidos
 
-
     @Test
     fun deveRegistrarNovaChavePix() {
-
-        //cenário
-
+        // cenário
         `when`(itauClient.consulta(clienteId = CLIENTE_ID.toString(), tipo = "CONTA_CORRENTE"))
             .thenReturn(HttpResponse.ok(dadosDaContaResponse()))
 
-        //ação
+        `when`(bcbClient.cadastra(createPixKeyRequest()))
+            .thenReturn(HttpResponse.created(createPixKeyResponse()))
 
+        // ação
         val response = grpcClient.cadastrarChavePix(
             CadastrarChavePixRequest.newBuilder()
                 .setClienteId(CLIENTE_ID.toString())
                 .setTipoChave(TipoChave.EMAIL)
-                .setChave("rponte@gamil.com")
+                .setChave("rponte@gmail.com")
                 .setTipoConta(TipoConta.CONTA_CORRENTE)
                 .build()
         )
 
-        //validacao
-
+        // validação
         with(response) {
+            assertEquals(CLIENTE_ID.toString(), clienteId)
             assertNotNull(pixId)
         }
-
     }
 
     @Test
     fun naoDeveCadastrarQuandoChaveJaExiste() {
-
-        //cenario
-
+        // cenário
         repository.save(
             chave(
-                tipoChave = br.com.zupacademy.gabrielamartins.model.enums.TipoChave.CPF,
+                tipo = br.com.zupacademy.gabrielamartins.model.enums.TipoChave.CPF,
                 chave = "63657520325",
                 clienteId = CLIENTE_ID
             )
         )
 
-        //acao
-
-        val thrown = assertThrows<StatusRuntimeException>{
-            grpcClient.cadastrarChavePix(CadastrarChavePixRequest.newBuilder()
-                .setClienteId(CLIENTE_ID.toString())
-                .setTipoChave(TipoChave.CPF)
-                .setChave("63657520325")
-                .setTipoConta(TipoConta.CONTA_CORRENTE)
-                .build())
+        // ação
+        val thrown = assertThrows<StatusRuntimeException> {
+            grpcClient.cadastrarChavePix(
+                CadastrarChavePixRequest.newBuilder()
+                    .setClienteId(CLIENTE_ID.toString())
+                    .setTipoChave(TipoChave.CPF)
+                    .setChave("63657520325")
+                    .setTipoConta(TipoConta.CONTA_CORRENTE)
+                    .build()
+            )
         }
 
-        //validacao
-
-        with(thrown){
+        // validação
+        with(thrown) {
             assertEquals(Status.ALREADY_EXISTS.code, status.code)
             assertEquals("Chave Pix '63657520325' já existe no sistema", status.description)
         }
     }
 
     @Test
-    fun naoDeveCadastrarQuandoClienteNaoExistir(){
-
-        //cenario
+    fun naoDeveCadastrarQuandoClienteNaoExistir() {
+        // cenário
         `when`(itauClient.consulta(clienteId = CLIENTE_ID.toString(), tipo = "CONTA_CORRENTE"))
             .thenReturn(HttpResponse.notFound())
 
-        //ação
-
+        // ação
         val thrown = assertThrows<StatusRuntimeException> {
-            grpcClient.cadastrarChavePix(CadastrarChavePixRequest.newBuilder()
-                .setClienteId(CLIENTE_ID.toString())
-                .setTipoChave(TipoChave.EMAIL)
-                .setChave("rponte@gmail.com")
-                .setTipoConta(TipoConta.CONTA_CORRENTE)
-                .build())
+            grpcClient.cadastrarChavePix(
+                CadastrarChavePixRequest.newBuilder()
+                    .setClienteId(CLIENTE_ID.toString())
+                    .setTipoChave(TipoChave.EMAIL)
+                    .setChave("rponte@gmail.com")
+                    .setTipoConta(TipoConta.CONTA_CORRENTE)
+                    .build()
+            )
         }
 
-        //validação
-
-        with(thrown){
+        // validação
+        with(thrown) {
             assertEquals(Status.FAILED_PRECONDITION.code, status.code)
             assertEquals("Cliente não encontrado", status.description)
         }
     }
 
+    @Test
+    fun naoDeveRegistrarQuandoNaoForPossivelCadastrarNoBcb() {
+        // cenário
+        `when`(itauClient.consulta(clienteId = CLIENTE_ID.toString(), tipo = "CONTA_CORRENTE"))
+            .thenReturn(HttpResponse.ok(dadosDaContaResponse()))
+
+        `when`(bcbClient.cadastra(createPixKeyRequest()))
+            .thenReturn(HttpResponse.badRequest())
+
+        // ação
+        val thrown = assertThrows<StatusRuntimeException> {
+            grpcClient.cadastrarChavePix(
+                CadastrarChavePixRequest.newBuilder()
+                    .setClienteId(CLIENTE_ID.toString())
+                    .setTipoChave(TipoChave.EMAIL)
+                    .setChave("rponte@gmail.com")
+                    .setTipoConta(TipoConta.CONTA_CORRENTE)
+                    .build()
+            )
+        }
+
+        // validação
+        with(thrown) {
+            assertEquals(Status.FAILED_PRECONDITION.code, status.code)
+            assertEquals("Erro ao registrar chave Pix no BCB", status.description)
+        }
+    }
 
     @Test
-    fun naoDeveCadastrarQuandoParametrosForemInvalidos(){
-
+    fun naoDeveCadastrarQuandoParametrosForemInvalidos() {
         //ação
 
         val thrown = assertThrows<StatusRuntimeException> {
@@ -158,30 +183,84 @@ internal class CadastraChavePixEndpointTest(
         }
     }
 
+
+
+    @MockBean(BcbClient::class)
+    fun bcbClient(): BcbClient? {
+        return Mockito.mock(BcbClient::class.java)
+    }
+
     @MockBean(ItauErpClient::class)
-    fun itauClient(): ItauErpClient {
+    fun itauClient(): ItauErpClient? {
         return Mockito.mock(ItauErpClient::class.java)
+    }
+
+    @Factory
+    class Clients {
+        @Bean
+        fun blockingStub(@GrpcChannel(GrpcServerChannel.NAME) channel: ManagedChannel): KeyManagerCadastraServiceGrpc.KeyManagerCadastraServiceBlockingStub? {
+            return KeyManagerCadastraServiceGrpc.newBlockingStub(channel)
+        }
     }
 
     private fun dadosDaContaResponse(): DadosContaResponse {
         return DadosContaResponse(
-            instituicao = InstituicaoResponse("UNIBANCO ITAU SA", "1"), agencia = "1281", numero = "291900",
-            titular = TitularResponse("Rafael Ponte", "63657520325"), tipo = "CONTA_CORRENTE"
+            tipo = "CONTA_CORRENTE",
+            instituicao = InstituicaoResponse("UNIBANCO ITAU SA", Conta.ITAU_UNIBANCO_ISPB),
+            agencia = "1218",
+            numero = "291900",
+            titular = TitularResponse("Rafael Ponte", "63657520325")
+        )
+    }
+
+    private fun createPixKeyRequest(): CreatePixRequest {
+        return CreatePixRequest(
+            keyType = KeyType.EMAIL,
+            key = "rponte@gmail.com",
+            bankAccount = bankAccount(),
+            owner = owner()
+        )
+    }
+
+    private fun createPixKeyResponse(): CreatePixResponse {
+        return CreatePixResponse(
+            keyType = KeyType.EMAIL,
+            key = "rponte@gmail.com",
+            bankAccount = bankAccount(),
+            owner = owner(),
+            createdAt = LocalDateTime.now()
+        )
+    }
+
+    private fun bankAccount(): BankAccount {
+        return BankAccount(
+            participant = Conta.ITAU_UNIBANCO_ISPB,
+            branch = "1218",
+            accountNumber = "291900",
+            accountType = BankAccount.AccountType.CACC
+        )
+    }
+
+    private fun owner(): Owner {
+        return Owner(
+            type = Owner.OwnerType.NATURAL_PERSON,
+            name = "Rafael Ponte",
+            taxIdNumber = "63657520325"
         )
     }
 
     private fun chave(
-        tipoChave: br.com.zupacademy.gabrielamartins.model.enums.TipoChave,
+        tipo: br.com.zupacademy.gabrielamartins.model.enums.TipoChave,
         chave: String = UUID.randomUUID().toString(),
-        clienteId: UUID = UUID.randomUUID()
+        clienteId: UUID = UUID.randomUUID(),
     ): ChavePix {
         return ChavePix(
             clienteId = clienteId,
-            tipoChave = tipoChave,
+            tipoChave = tipo,
             chave = chave,
             tipoConta = br.com.zupacademy.gabrielamartins.model.enums.TipoConta.CONTA_CORRENTE,
             conta = Conta(
-                instituicao = "UNIBANCO_ITAU",
+                instituicao = "UNIBANCO ITAU",
                 nomeTitular = "Rafael Ponte",
                 cpfTitular = "63657520325",
                 agencia = "1218",
@@ -190,13 +269,4 @@ internal class CadastraChavePixEndpointTest(
         )
     }
 
-    @Factory
-    class Clients {
-        @Bean
-        fun blockingStub(@GrpcChannel(GrpcServerChannel.NAME) channel: ManagedChannel): KeyManagerCadastraServiceGrpc.KeyManagerCadastraServiceBlockingStub {
-            return KeyManagerCadastraServiceGrpc.newBlockingStub(channel)
-        }
-
-
-    }
 }

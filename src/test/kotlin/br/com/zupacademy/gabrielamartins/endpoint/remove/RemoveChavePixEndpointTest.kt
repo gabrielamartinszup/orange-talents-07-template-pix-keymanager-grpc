@@ -6,6 +6,9 @@ import br.com.zupacademy.gabrielamartins.model.ChavePix
 import br.com.zupacademy.gabrielamartins.model.Conta
 import br.com.zupacademy.gabrielamartins.model.enums.TipoChave
 import br.com.zupacademy.gabrielamartins.repository.ChavePixRepository
+import br.com.zupacademy.gabrielamartins.service.BcbClient
+import br.com.zupacademy.gabrielamartins.service.DeletePixRequest
+import br.com.zupacademy.gabrielamartins.service.DeletePixResponse
 import io.grpc.ManagedChannel
 import io.grpc.Status
 import io.grpc.StatusRuntimeException
@@ -13,12 +16,19 @@ import io.micronaut.context.annotation.Bean
 import io.micronaut.context.annotation.Factory
 import io.micronaut.grpc.annotation.GrpcChannel
 import io.micronaut.grpc.server.GrpcServerChannel
+import io.micronaut.http.HttpResponse
+import io.micronaut.http.HttpStatus
+import io.micronaut.test.annotation.MockBean
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
+import jakarta.inject.Inject
 import org.junit.Assert.assertEquals
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.mockito.Mockito.`when`
+import org.mockito.Mockito.mock
+import java.time.LocalDateTime
 import java.util.*
 
 @MicronautTest(transactional = false)
@@ -31,6 +41,9 @@ internal class RemoveChavePixEndpointTest(
     //2. nao deve remover quando a chave nao existir
     //3. nao deve remover quando chave existe mas não pertence ao cliente
 
+
+    @Inject
+    lateinit var bcbClient: BcbClient
 
     lateinit var CHAVE_EXISTENTE: ChavePix
 
@@ -53,6 +66,11 @@ internal class RemoveChavePixEndpointTest(
 
     @Test
     fun deveRemoverChavePix() {
+
+        //cenário
+
+        `when`(bcbClient.delete("rponte@gmail.com", DeletePixRequest("rponte@gmail.com")))
+            .thenReturn(HttpResponse.ok(DeletePixResponse(key = "rponte@gmail.com", participant = Conta.ITAU_UNIBANCO_ISPB, deletedAt = LocalDateTime.now())))
 
         //acao
 
@@ -124,6 +142,36 @@ internal class RemoveChavePixEndpointTest(
             assertEquals("Chave Pix não foi encontrada ou não pertence ao cliente", status.description)
         }
 
+    }
+
+    @Test
+    fun naoDeveRemoverQuandoOcorrerAlgumErroNoServicoDoBcb(){
+
+        //cenário
+
+        `when`(bcbClient.delete("rponte@gmail.com", DeletePixRequest("rponte@gmail.com", participant = Conta.ITAU_UNIBANCO_ISPB)))
+            .thenReturn(HttpResponse.unprocessableEntity())
+
+        //ação
+
+        val thrown = assertThrows<StatusRuntimeException> {
+            grpcClient.removerChavePix(RemoverChavePixRequest.newBuilder()
+                .setPixId(CHAVE_EXISTENTE.id.toString())
+                .setClienteId(CHAVE_EXISTENTE.clienteId.toString())
+                .build())
+        }
+
+        //validação
+
+        with(thrown){
+            assertEquals(Status.FAILED_PRECONDITION.code, status.code)
+            assertEquals("Erro ao remover chave Pix do BCB", status.description)
+        }
+    }
+
+    @MockBean(BcbClient::class)
+    fun bcbClient(): BcbClient? {
+        return mock(BcbClient::class.java)
     }
 
     @Factory
