@@ -20,7 +20,7 @@ class ListaChavesPixEndpoint(@Inject private val repository: ChavePixRepository)
         responseObserver: StreamObserver<ListarChavesPixResponse>
     ) {
 
-        if (request.clienteId.isNullOrBlank()) 
+        if (request.clienteId.isNullOrBlank())
             throw IllegalArgumentException("Cliente ID não pode ser nulo ou vazio")
 
         val clienteId = UUID.fromString(request.clienteId)
