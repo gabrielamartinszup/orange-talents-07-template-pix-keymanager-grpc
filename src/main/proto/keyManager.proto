@@ -5,6 +5,8 @@ option java_package = "br.com.zupacademy.gabrielamartins";
 option java_outer_classname = "KeyManager";
 option objc_class_prefix = "HLW";
 
+import "google/protobuf/timestamp.proto";
+
 package br.com.zupacademy.gabrielamartins;
 
 service KeyManagerCadastraService{
@@ -15,6 +17,10 @@ service KeyManagerCadastraService{
 
 service KeyManagerRemoveService{
   rpc removerChavePix (RemoverChavePixRequest) returns (RemoverChavePixResponse){}
+}
+
+service KeyManagerCarregaService{
+  rpc carregarChavePix (CarregarChavePixRequest) returns (CarregarChavePixResponse){}
 }
 
 
@@ -45,7 +51,6 @@ message CadastrarChavePixRequest {
   TipoConta tipoConta = 4;
 
 
-
 }
 
 message CadastrarChavePixResponse {
@@ -64,4 +69,41 @@ message RemoverChavePixResponse {
 
   string clienteId = 1;
   string pixId = 2;
+}
+
+message CarregarChavePixRequest{
+
+  message FiltroPorPixId{
+    string clienteId = 1;
+    string pixId = 2;
+  }
+
+  oneof filtro{
+    FiltroPorPixId pixId = 1;
+    string chave = 2;
+  }
+}
+
+message CarregarChavePixResponse {
+
+  message ChavePix{
+
+    message ContaInfo{
+      TipoConta tipoConta = 1;
+      string instituicao = 2;
+      string nomeTitular = 3;
+      string cpfTitular = 4;
+      string agencia = 5;
+      string numeroConta = 6;
+    }
+
+    TipoChave tipoChave = 1;
+    string chave = 2;
+    ContaInfo conta = 3;
+    google.protobuf.Timestamp criadaEm = 4;
+  }
+
+  string clienteId = 1;
+  string pixId = 2;
+  ChavePix chave = 3;
 }
