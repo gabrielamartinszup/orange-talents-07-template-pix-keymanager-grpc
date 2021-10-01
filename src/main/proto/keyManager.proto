@@ -23,6 +23,10 @@ service KeyManagerCarregaService{
   rpc carregarChavePix (CarregarChavePixRequest) returns (CarregarChavePixResponse){}
 }
 
+service KeyManagerListaService{
+  rpc listarChavesPix (ListarChavesPixRequest) returns (ListarChavesPixResponse){}
+}
+
 
 
 enum TipoChave {
@@ -106,4 +110,24 @@ message CarregarChavePixResponse {
   string clienteId = 1;
   string pixId = 2;
   ChavePix chave = 3;
+}
+
+message ListarChavesPixRequest {
+
+  string clienteId = 1;
+}
+
+message ListarChavesPixResponse {
+
+  message ChavePix {
+    string pixId = 1;
+    TipoChave tipoChave = 2;
+    string chave = 3;
+    TipoConta tipoConta = 4;
+    google.protobuf.Timestamp criadaEm = 5;
+  }
+
+  string clienteId = 1;
+  repeated ChavePix chaves = 2;
+
 }

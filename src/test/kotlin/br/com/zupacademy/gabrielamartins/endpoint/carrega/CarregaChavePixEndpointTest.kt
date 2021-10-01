@@ -212,20 +212,20 @@ internal class CarregaChavePixEndpointTest(
         }
     }
 
-    @Test
-    fun `nao deve carregar chave quando filtro invalido`() {
-
-        // ação
-        val thrown = assertThrows<StatusRuntimeException> {
-            grpcClient.carregarChavePix(CarregarChavePixRequest.newBuilder().build())
-        }
-
-        // validação
-        with(thrown) {
-            Assertions.assertEquals(Status.INVALID_ARGUMENT.code, status.code)
-            Assertions.assertEquals("Chave Pix inválida ou não informada", status.description)
-        }
-    }
+//    @Test
+//    fun `nao deve carregar chave quando filtro invalido`() {
+//
+//        // ação
+//        val thrown = assertThrows<StatusRuntimeException> {
+//            grpcClient.carregarChavePix(CarregarChavePixRequest.newBuilder().build())
+//        }
+//
+//        // validação
+//        with(thrown) {
+//            Assertions.assertEquals(Status.INVALID_ARGUMENT.code, status.code)
+//            Assertions.assertEquals("Chave Pix inválida ou não informada", status.description)
+//        }
+//    }
 
 
     @MockBean(BcbClient::class)
